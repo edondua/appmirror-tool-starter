@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@appmirror/ui-kit": "github:edondua/appmirror-ui-kit"
+    "@appmirror/ui-kit": "^1.1.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",
