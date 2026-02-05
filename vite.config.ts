@@ -15,8 +15,13 @@ export default defineConfig({
         './Tool': './src/Tool.tsx',
       },
       shared: {
+        // CRITICAL: All these must be singletons to share React context
+        // This prevents "Cannot read properties of null (reading 'useContext')" errors
         react: { singleton: true, requiredVersion: '^19.0.0' },
         'react-dom': { singleton: true, requiredVersion: '^19.0.0' },
+        // Required for React Query context to work across module boundaries
+        '@tanstack/react-query': { singleton: true },
+        // Required for useToolContext and all UI components to work
         '@appmirror/ui-kit': { singleton: true },
       },
     }),

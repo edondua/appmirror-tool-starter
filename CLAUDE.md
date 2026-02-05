@@ -27,6 +27,24 @@ This Tool (Remote)
 @appmirror/ui-kit (Shared components)
 ```
 
+### Shared Modules (CRITICAL)
+
+The following must be configured as singletons in `vite.config.ts`:
+
+```typescript
+shared: {
+  react: { singleton: true, requiredVersion: '^19.0.0' },
+  'react-dom': { singleton: true, requiredVersion: '^19.0.0' },
+  '@tanstack/react-query': { singleton: true },
+  '@appmirror/ui-kit': { singleton: true },
+}
+```
+
+This ensures:
+- React context works across module boundaries
+- Dialogs, popovers, and tabs function correctly
+- No "Cannot read properties of null (reading 'useContext')" errors
+
 ### Context Provider
 
 Tools receive everything from AppMirror via `useToolContext()`:
@@ -35,12 +53,13 @@ Tools receive everything from AppMirror via `useToolContext()`:
 const {
   projectId,      // Which project is selected
   projectName,    // Project display name
+  projectConfig,  // Tool-specific settings from project
   userId,         // Logged-in user
   userEmail,      // User's email
   canEdit,        // Edit permission
   canAdmin,       // Admin permission
   api,            // Pre-authenticated API client
-  showToast,      // Notification function
+  showToast,      // Notification function (USE THIS, not alert()!)
   navigate,       // Navigation function
 } = useToolContext();
 ```
@@ -49,7 +68,8 @@ const {
 
 ```
 src/
-└── Tool.tsx      # Main exported component (this is what AppMirror loads)
+├── Tool.tsx      # Main exported component (this is what AppMirror loads)
+└── main.tsx      # Optional: for standalone dev testing
 ```
 
 ## Important Rules
@@ -59,8 +79,10 @@ src/
 - Use `@appmirror/ui-kit` for all UI components
 - Use `useToolContext()` for auth, API, and project info
 - Use `api.get()`, `api.post()` etc. for backend calls
+- Use `showToast()` for all notifications
 - Handle loading and error states
 - Check `canEdit` before allowing modifications
+- Use `"latest"` for ui-kit version in package.json
 
 ### DON'T
 
@@ -69,6 +91,8 @@ src/
 - Store auth tokens (host handles auth)
 - Make direct fetch/axios calls (use provided `api`)
 - Access localStorage for user data
+- Use `alert()` - use `showToast()` instead!
+- Forget to add `@tanstack/react-query` to shared modules
 
 ## Button Variants
 
@@ -79,6 +103,7 @@ src/
 <Button variant="destructive">Destructive</Button>
 <Button variant="outline">Outline</Button>
 <Button variant="ghost">Ghost</Button>
+<Button variant="mono">Monochrome</Button>
 
 // INVALID - these don't exist
 <Button variant="default">  // Use "primary"
@@ -135,6 +160,24 @@ return (
 );
 ```
 
+### Using Dialogs
+
+```tsx
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Button } from '@appmirror/ui-kit';
+
+<Dialog>
+  <DialogTrigger asChild>
+    <Button>Open Dialog</Button>
+  </DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Title</DialogTitle>
+    </DialogHeader>
+    <p>Content...</p>
+  </DialogContent>
+</Dialog>
+```
+
 ## Building & Testing
 
 ```bash
@@ -145,8 +188,27 @@ npm run preview  # Preview production build
 
 ## Deployment
 
+### Railway (Recommended)
+1. Push to GitHub
+2. Connect to Railway
+3. Railway auto-detects Vite
+4. Get URL: `https://mytool.up.railway.app/assets/remoteEntry.js`
+
+### Vercel
 1. Push to GitHub
 2. Connect to Vercel
 3. Build command: `npm run build`
 4. Output: `dist`
-5. Get URL and register in AppMirror admin
+5. Get URL: `https://mytool.vercel.app/assets/remoteEntry.js`
+
+### Register in AppMirror
+Go to Admin Settings → Tools tab and add your tool with the remote URL.
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| "Cannot read properties of null (reading 'useContext')" | Add all shared modules to vite.config.ts |
+| "No QueryClient set" | Add `@tanstack/react-query` to shared modules |
+| Dialogs show overlay but no content | Update ui-kit: `npm update @appmirror/ui-kit` |
+| Tabs not showing active state | Update ui-kit: `npm update @appmirror/ui-kit` |
