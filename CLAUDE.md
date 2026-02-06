@@ -69,7 +69,42 @@ const {
 ```
 src/
 ├── Tool.tsx      # Main exported component (this is what AppMirror loads)
-└── main.tsx      # Optional: for standalone dev testing
+├── main.tsx      # For standalone dev testing
+└── index.css     # Tailwind 4 config (CRITICAL - must have @source directives)
+index.html        # Entry for standalone dev
+server.js         # Express server for Railway deployment
+```
+
+## Tailwind 4 Configuration (CRITICAL)
+
+The `src/index.css` file MUST include @source directives for Tailwind 4 to scan ui-kit components:
+
+```css
+@import "tailwindcss";
+
+/* Source files for Tailwind to scan */
+@source "../node_modules/@appmirror/ui-kit/dist/**/*.js";
+@source "./**/*.{js,jsx,ts,tsx}";
+
+/*
+ * IMPORTANT: Do NOT define :root variables here.
+ * The host app provides all theme variables.
+ */
+```
+
+**Why this matters:**
+- Tailwind 4 only generates CSS for classes it finds in scanned files
+- Without `@source` for ui-kit, `data-[state=active]` styles won't be generated
+- This causes tabs to not show active state, dialogs to be invisible, etc.
+
+**NEVER add CSS variables in tools:**
+```css
+/* BAD - This will override the host app's theme! */
+:root {
+  --background: white;
+}
+
+/* GOOD - No variables, just @source directives */
 ```
 
 ## Important Rules
@@ -210,5 +245,7 @@ Go to Admin Settings → Tools tab and add your tool with the remote URL.
 |-------|----------|
 | "Cannot read properties of null (reading 'useContext')" | Add all shared modules to vite.config.ts |
 | "No QueryClient set" | Add `@tanstack/react-query` to shared modules |
-| Dialogs show overlay but no content | Update ui-kit: `npm update @appmirror/ui-kit` |
-| Tabs not showing active state | Update ui-kit: `npm update @appmirror/ui-kit` |
+| Dialogs show overlay but no content | Check @source directive in index.css includes ui-kit |
+| Tabs not showing active state | Check @source directive in index.css includes ui-kit |
+| Theme colors wrong / header changes color | Remove any :root CSS variables from index.css |
+| remoteEntry.js 404 on Railway | Use server.js with express, set start script |

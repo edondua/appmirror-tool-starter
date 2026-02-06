@@ -11,6 +11,7 @@ import {
   Badge,
   useToolContext,
 } from '@appmirror/ui-kit';
+import './index.css';
 
 /**
  * Main Tool Component

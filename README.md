@@ -95,15 +95,39 @@ import {
 - `lg` - Large
 - `icon` - Icon only
 
+## Tailwind 4 Configuration (IMPORTANT)
+
+This template uses Tailwind CSS 4. The `src/index.css` file **must** include `@source` directives to scan the ui-kit:
+
+```css
+@import "tailwindcss";
+
+/* REQUIRED: Scan ui-kit for component classes */
+@source "../node_modules/@appmirror/ui-kit/dist/**/*.js";
+@source "./**/*.{js,jsx,ts,tsx}";
+
+/* Do NOT add :root variables - they'll override the host app's theme */
+```
+
+**Why this matters:**
+- Without `@source` for ui-kit, tabs won't show active state, dialogs may not appear correctly
+- Tailwind 4 only generates CSS for classes it finds in scanned files
+- Never add `:root` CSS variables - the host app (AppMirror) provides all theme variables
+
 ## Deployment
 
 ### Deploy to Railway (Recommended)
 
 1. Push your repo to GitHub
 2. Connect to Railway (railway.app)
-3. Railway auto-detects Vite and builds correctly
+3. Configure Railway:
+   - Build command: `npm run build`
+   - Start command: `npm start` (uses server.js)
 4. Note your deployment URL (e.g., `mytool.up.railway.app`)
-5. Remote entry: `https://mytool.up.railway.app/assets/remoteEntry.js`
+5. Remote entry: `https://mytool.up.railway.app/remoteEntry.js`
+
+**Why server.js?**
+Railway needs an Express server to serve the built files with proper CORS headers required for Module Federation cross-origin loading.
 
 ### Deploy to Vercel
 
@@ -119,7 +143,7 @@ Go to **Admin Settings → Tools tab** in AppMirror and add:
 - **Tool ID:** `mytool` (your unique identifier from vite.config.ts)
 - **Tool Name:** `My Tool` (display name)
 - **Icon:** `wrench` (any KeenIcon name)
-- **Remote URL:** `https://mytool.up.railway.app/assets/remoteEntry.js`
+- **Remote URL:** `https://mytool.up.railway.app/remoteEntry.js`
 
 ## Development Tips
 
@@ -183,7 +207,10 @@ function MyComponent() {
 my-tool/
 ├── src/
 │   ├── Tool.tsx          # Main component (exposed via Module Federation)
-│   └── main.tsx          # Optional: for standalone dev testing
+│   ├── main.tsx          # For standalone dev testing
+│   └── index.css         # Tailwind 4 config with @source directives
+├── index.html            # Entry for standalone dev
+├── server.js             # Express server for Railway deployment
 ├── vite.config.ts        # Vite + Module Federation config
 ├── package.json
 ├── tsconfig.json
@@ -210,11 +237,25 @@ Add `@tanstack/react-query` to your shared modules (see above).
 
 ### Dialogs show overlay but no content
 
-Update to latest ui-kit: `npm update @appmirror/ui-kit`
+Check that `src/index.css` has the `@source` directive for ui-kit:
+```css
+@source "../node_modules/@appmirror/ui-kit/dist/**/*.js";
+```
 
 ### Tabs not showing active state
 
-Update to latest ui-kit: `npm update @appmirror/ui-kit`
+Same as above - ensure `@source` directive includes ui-kit in `src/index.css`.
+
+### Theme colors wrong / header changes color when tool loads
+
+You may have `:root` CSS variables in your tool that override the host app. **Remove all `:root` variables from your CSS.**
+
+### remoteEntry.js 404 on Railway
+
+Make sure:
+1. `server.js` exists and serves from `dist/assets`
+2. `package.json` has `"start": "node server.js"`
+3. Railway is configured to run `npm start`
 
 ## Auto-Updates
 
@@ -226,4 +267,4 @@ This template uses `"latest"` for `@appmirror/ui-kit`, which means:
 ## Need Help?
 
 - Check `docs/TOOL_DEVELOPMENT.md` in the AppMirror repo
-- Review TTSlide as a reference implementation (`github.com/edondua/ttPost`)
+- Review TTSlide as a reference implementation (`github.com/edondua/ttslide`)

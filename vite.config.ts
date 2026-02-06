@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
+import tailwindcss from '@tailwindcss/vite';
 import federation from '@originjs/vite-plugin-federation';
 
 // IMPORTANT: Change 'mytool' to your tool's unique name
@@ -8,6 +9,7 @@ const TOOL_NAME = 'mytool';
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     federation({
       name: TOOL_NAME,
       filename: 'remoteEntry.js',

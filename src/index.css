@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Source files for Tailwind to scan */
+@source "../node_modules/@appmirror/ui-kit/dist/**/*.js";
+@source "./**/*.{js,jsx,ts,tsx}";
+
+/*
+ * IMPORTANT: This tool inherits CSS variables from the host app (AppMirror).
+ * Do NOT define :root variables here as they will override the host's theme.
+ * The host app provides all theme variables for consistent styling.
+ */
