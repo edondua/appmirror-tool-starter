@@ -109,6 +109,27 @@ The `src/index.css` file MUST include @source directives for Tailwind 4 to scan 
 
 ## Important Rules
 
+### Overflow Prevention (CRITICAL)
+
+Tool content must NOT overflow its container — otherwise it will cover the AppMirror header/sidebar. Always add `min-w-0 overflow-hidden` to the tool's root wrapper:
+
+```tsx
+// CORRECT - prevents overflow
+<div className="space-y-6 p-6 min-w-0 overflow-hidden">
+  {/* Tool content */}
+</div>
+
+// WRONG - content can escape the tool container and cover the header
+<div className="space-y-6 p-6">
+  {/* Tool content */}
+</div>
+```
+
+**Why:**
+- `min-w-0` allows the tool to shrink inside flex containers instead of overflowing
+- `overflow-hidden` clips any content that exceeds the container boundaries
+- Without this, the host's `ToolContainer` containment can be defeated by expanding content
+
 ### DO
 
 - Use `@appmirror/ui-kit` for all UI components
@@ -249,3 +270,4 @@ Go to Admin Settings → Tools tab and add your tool with the remote URL.
 | Tabs not showing active state | Check @source directive in index.css includes ui-kit |
 | Theme colors wrong / header changes color | Remove any :root CSS variables from index.css |
 | remoteEntry.js 404 on Railway | Use server.js with express, set start script |
+| Tool content covers the header/sidebar | Add `min-w-0 overflow-hidden` to the tool's root wrapper div |
