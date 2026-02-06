@@ -5,7 +5,31 @@
 @source "./**/*.{js,jsx,ts,tsx}";
 
 /*
- * IMPORTANT: This tool inherits CSS variables from the host app (AppMirror).
- * Do NOT define :root variables here as they will override the host's theme.
- * The host app provides all theme variables for consistent styling.
+ * Map semantic design tokens to host CSS variables so shared UI components
+ * render consistently inside AppMirror.
  */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius: var(--radius, 0.5rem);
+}
+
+@custom-variant dark (&:is(.dark *));
+@custom-variant light (&:not(.dark *));

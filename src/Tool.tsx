@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './index.css';
 import {
   Card,
   CardContent,
@@ -11,12 +12,14 @@ import {
   Badge,
   useToolContext,
 } from '@appmirror/ui-kit';
-import './index.css';
 
 /**
  * Main Tool Component
  *
  * This component is loaded by AppMirror via Module Federation.
+ * IMPORTANT: Import CSS in this file so Module Federation loads styles
+ * when the host dynamically imports ./Tool.
+ *
  * It receives context (auth, project, API) from the host app.
  *
  * Available context via useToolContext():
@@ -66,7 +69,7 @@ export default function Tool() {
   };
 
   return (
-    <div className="space-y-6 p-6 min-w-0 overflow-hidden">
+    <div data-tool-root="newtool" className="space-y-6 p-6 min-w-0 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -75,7 +78,7 @@ export default function Tool() {
             Working on: {projectName}
           </p>
         </div>
-        <Badge variant={canEdit ? 'default' : 'secondary'}>
+        <Badge variant={canEdit ? 'primary' : 'secondary'}>
           {canEdit ? 'Edit Access' : 'View Only'}
         </Badge>
       </div>
