@@ -64,9 +64,10 @@ export default function Tool() {
     try {
       // Example: Save to custom tools database
       // Use toolsDb for writing tool-specific data
+      // Note: Use snake_case for PostgreSQL column names
       await toolsDb.post('/your-tool-data', {
-        projectId,
-        userId,
+        project_id: projectId,  // snake_case for database columns
+        user_id: userId,
         data: inputValue,
       });
       showToast('Saved successfully!', 'success');
@@ -85,17 +86,25 @@ export default function Tool() {
    * 1. Reading from main database (project config, user data, etc.):
    *    const config = await api.get('/config');
    *
-   * 2. Saving tool-specific data to tools database:
-   *    await toolsDb.post('/my-tool/data', { value: 'example' });
+   * 2. Saving tool-specific data to tools database (use snake_case):
+   *    await toolsDb.post('/my-tool/data', {
+   *      project_id: projectId,
+   *      user_id: userId,
+   *      value: 'example'
+   *    });
    *
    * 3. Loading tool-specific data:
-   *    const toolData = await toolsDb.get('/my-tool/data?projectId=' + projectId);
+   *    const response = await toolsDb.get('/my-tool/data?projectId=' + projectId);
+   *    const toolData = response.data; // Array of records
    *
    * 4. Updating tool data:
    *    await toolsDb.put('/my-tool/data/' + id, { value: 'updated' });
    *
    * 5. Deleting tool data:
    *    await toolsDb.delete('/my-tool/data/' + id);
+   *
+   * IMPORTANT: Use snake_case for PostgreSQL column names (project_id, user_id, created_at)
+   * The backend will map these to the database columns correctly.
    */
 
   return (
