@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import './index.css';
 import {
   Card,
   CardContent,
@@ -17,8 +16,12 @@ import {
  * Main Tool Component
  *
  * This component is loaded by AppMirror via Module Federation.
- * IMPORTANT: Import CSS in this file so Module Federation loads styles
- * when the host dynamically imports ./Tool.
+ *
+ * CSS Isolation Strategy:
+ * - NO CSS import here (federated entry point)
+ * - All styling via Tailwind utility classes (inherited from host)
+ * - Tailwind utilities are automatically scoped by Vite CSS Modules
+ * - ui-kit components loaded as singleton from host
  *
  * It receives context (auth, project, API) from the host app.
  *
@@ -69,7 +72,7 @@ export default function Tool() {
   };
 
   return (
-    <div data-tool-root="newtool" className="space-y-6 p-6 min-w-0 overflow-hidden">
+    <div className="space-y-6 p-6 min-w-0 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

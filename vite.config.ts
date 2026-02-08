@@ -2,54 +2,25 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import tailwindcss from '@tailwindcss/vite';
 import { federation } from '@module-federation/vite';
+import { fileURLToPath } from 'url';
 
 // IMPORTANT: Change 'mytool' to your tool's unique name
 const TOOL_NAME = 'mytool';
-const toolRootSelector = '[data-tool-root="newtool"]';
 
-function createScopedCssPlugin(scopeSelector: string) {
-  return {
-    postcssPlugin: 'scope-tool-css',
-    Rule(rule: { selectors?: string[]; parent?: { type?: string; name?: string } }) {
-      if (!rule.selectors) {
-        return;
-      }
-
-      const parentName = rule.parent?.name ?? '';
-      if (rule.parent?.type === 'atrule' && /keyframes$/i.test(parentName)) {
-        return;
-      }
-
-      rule.selectors = rule.selectors.map((selector) => {
-        const trimmed = selector.trim();
-        if (!trimmed) {
-          return selector;
-        }
-        if (trimmed.startsWith(scopeSelector)) {
-          return trimmed;
-        }
-        if (
-          trimmed === ':root' ||
-          trimmed === ':host' ||
-          trimmed === 'html' ||
-          trimmed === 'body'
-        ) {
-          return scopeSelector;
-        }
-        if (trimmed.startsWith('::')) {
-          return scopeSelector;
-        }
-        return `${scopeSelector} ${trimmed}`;
-      });
-    },
-  };
-}
-const scopedCssPlugin = createScopedCssPlugin(toolRootSelector);
+const mfVirtualDir = fileURLToPath(
+  new URL('./node_modules/__mf__virtual', import.meta.url)
+);
 
 export default defineConfig({
   css: {
-    postcss: {
-      plugins: [scopedCssPlugin],
+    modules: {
+      // Enable CSS Modules with scoped class names
+      generateScopedName: '[name]__[local]___[hash:base64:5]',
+    },
+  },
+  resolve: {
+    alias: {
+      __mf__virtual: mfVirtualDir,
     },
   },
   plugins: [
@@ -64,19 +35,38 @@ export default defineConfig({
       shared: {
         // CRITICAL: All these must be singletons to share React context
         // This prevents "Cannot read properties of null (reading 'useContext')" errors
-        react: { singleton: true, requiredVersion: '^19.0.0' },
-        'react-dom': { singleton: true, requiredVersion: '^19.0.0' },
+        react: {
+          singleton: true,
+          requiredVersion: '^19.0.0',
+          strictVersion: false,
+        },
+        'react-dom': {
+          singleton: true,
+          requiredVersion: '^19.0.0',
+          strictVersion: false,
+        },
         // Required for React Query context to work across module boundaries
-        '@tanstack/react-query': { singleton: true },
+        '@tanstack/react-query': {
+          singleton: true,
+          strictVersion: false,
+        },
         // Required for useToolContext and all UI components to work
-        '@appmirror/ui-kit': { singleton: true },
+        '@appmirror/ui-kit': {
+          singleton: true,
+          strictVersion: false,
+        },
       },
     }),
   ],
   build: {
     target: 'esnext',
     minify: true,
-    cssCodeSplit: true,
+    cssCodeSplit: false,
+    rollupOptions: {
+      output: {
+        minifyInternalExports: false,
+      },
+    },
   },
   server: {
     port: 5174,
