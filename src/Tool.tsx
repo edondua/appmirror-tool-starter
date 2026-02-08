@@ -29,9 +29,15 @@ import {
  * - projectId, projectName: Current project info
  * - userId, userEmail: Logged-in user info
  * - canEdit, canAdmin: Permission flags
- * - api: Pre-authenticated API client (get, post, put, patch, delete)
+ * - api: Pre-authenticated API client for READING from main database
+ * - toolsDb: API client for READ/WRITE to custom tools database
  * - showToast: Show notifications
  * - navigate: Navigate within AppMirror
+ *
+ * Database Architecture:
+ * - Use `api` to READ data from the main AppMirror database
+ * - Use `toolsDb` to READ/WRITE tool-specific data to the custom tools database
+ * - Example: Load project config with api.get(), save tool data with toolsDb.post()
  */
 export default function Tool() {
   const {
@@ -41,6 +47,7 @@ export default function Tool() {
     userEmail,
     canEdit,
     api,
+    toolsDb,
     showToast,
   } = useToolContext();
 
@@ -55,10 +62,11 @@ export default function Tool() {
 
     setIsLoading(true);
     try {
-      // Example API call using the pre-authenticated client
-      // Replace with your actual endpoint
-      await api.post('/api/your-endpoint', {
+      // Example: Save to custom tools database
+      // Use toolsDb for writing tool-specific data
+      await toolsDb.post('/your-tool-data', {
         projectId,
+        userId,
         data: inputValue,
       });
       showToast('Saved successfully!', 'success');
@@ -70,6 +78,25 @@ export default function Tool() {
       setIsLoading(false);
     }
   };
+
+  /**
+   * Best Practices for API Usage:
+   *
+   * 1. Reading from main database (project config, user data, etc.):
+   *    const config = await api.get('/config');
+   *
+   * 2. Saving tool-specific data to tools database:
+   *    await toolsDb.post('/my-tool/data', { value: 'example' });
+   *
+   * 3. Loading tool-specific data:
+   *    const toolData = await toolsDb.get('/my-tool/data?projectId=' + projectId);
+   *
+   * 4. Updating tool data:
+   *    await toolsDb.put('/my-tool/data/' + id, { value: 'updated' });
+   *
+   * 5. Deleting tool data:
+   *    await toolsDb.delete('/my-tool/data/' + id);
+   */
 
   return (
     <div className="space-y-6 p-6 min-w-0 overflow-hidden text-foreground">
